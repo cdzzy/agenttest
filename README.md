@@ -363,15 +363,23 @@ python examples/test_scenarios.py
 
 ## Roadmap
 
-- [ ] `agenttest` CLI (`agenttest run tests/`)
-- [ ] Async agent support (`async def`)
+- [x] `agenttest` CLI (`agenttest edit --ui`, `agenttest --version`) ✅ (agenttest/cli.py, v0.2.0)
+- [x] Async agent support (`async def`) ✅ (agenttest/core/runner.py, v0.2.0)
+- [x] **Behavior snapshots** (regression testing) ✅ (agenttest/snapshots.py, v0.2.0)
+- [x] **Benchmarking** (multi-model comparison) ✅ (agenttest/benchmark.py, v0.2.0)
+- [x] **Chaos engineering** (resilience testing) ✅ (agenttest/chaos.py, v0.2.0)
+- [x] **Flakiness detection** ✅ (agenttest/flakiness.py, v0.2.0)
+- [x] **Suite run history** (pass-rate regression) ✅ (agenttest/core/history.py, v0.2.0)
+- [x] **MCP server testing** ✅ (agenttest/mcp_tools.py, v0.2.0)
+- [x] **Reasoning model assertions** ✅ (agenttest/assertions/trace.py, v0.2.0)
+- [x] **Visual test editor** ✅ (agenttest/ui/editor.html, v0.2.0)
+- [x] **GitHub Action** ✅ (action.yml, v0.2.0)
 - [ ] HTML/JSON test reports
 - [ ] Pytest plugin (`pytest-agenttest`)
 - [x] ~~LLM-as-judge assertions~~ ✅ (examples/test_llm_judge.py)
 - [x] ~~GitHub Actions template~~ ✅ (.github/workflows/ci.yml)
 - [x] ~~YAML test configuration~~ ✅ (load tests from YAML files, inspired by PraisonAI)
 - [x] **JSON Schema assertion** (validate structured agent output against JSON Schema draft-07, examples/test_json_schema.py)
-- [ ] Benchmark mode (compare two agents side by side)
 
 ---
 

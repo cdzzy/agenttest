@@ -251,3 +251,35 @@ def agent_test(
 
     return decorator
 
+
+def test_async(
+    name: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    skip: bool = False,
+    skip_reason: str = "",
+    repeat: int = 1,
+):
+    """
+    Decorator marking an async agent test function.
+
+    The runner auto-detects ``async def`` functions, so this is mostly a
+    semantic alias of :func:`agent_test` for async tests::
+
+        @test_async
+        async def test_async_agent(agent):
+            run = await agent("What is 2+2?")
+            assert "4" in run.output
+    """
+    def decorator(fn: Callable) -> Callable:
+        fn = agent_test(name=name, tags=tags, skip=skip,
+                        skip_reason=skip_reason, repeat=repeat)(fn)
+        fn._is_async = True
+        return fn
+
+    if callable(name):
+        fn = name
+        name = None
+        return decorator(fn)
+
+    return decorator
+

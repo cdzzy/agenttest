@@ -1,0 +1,56 @@
+name: 'Agent Test Runner'
+description: 'Run AgentTest suites in CI — zero-config quality gate for AI agents'
+author: 'cdzzy'
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  test-dir:
+    description: 'Directory containing agent test files (pytest-style)'
+    required: false
+    default: './tests/agents'
+  python-version:
+    description: 'Python version to use'
+    required: false
+    default: '3.11'
+  fail-on-flaky:
+    description: 'Treat flaky tests as failures (true/false)'
+    required: false
+    default: 'false'
+  install-extras:
+    description: 'Optional pip extras to install (e.g. "openai,langchain")'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install agenttest
+      shell: bash
+      run: |
+        pip install --upgrade pip
+        if [ -n "${{ inputs.install-extras }}" ]; then
+          pip install "agenttest[${{ inputs.install-extras }}]"
+        else
+          pip install agenttest pytest
+        fi
+
+    - name: Run agent tests
+      shell: bash
+      run: |
+        pytest "${{ inputs.test-dir }}" -v
+
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      with:
+        name: agenttest-results
+        path: |
+          .agenttest-history.jsonl
+          __snapshots__/
+        if-no-files-found: ignore

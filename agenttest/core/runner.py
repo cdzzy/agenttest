@@ -3,6 +3,7 @@ Test runner - executes tests and collects results.
 """
 from __future__ import annotations
 
+import inspect
 import sys
 import time
 import traceback
@@ -12,33 +13,70 @@ from agenttest.core.case import AgentRun, TestResult, TestStatus
 from agenttest.core.suite import AgentTestSuite
 
 
+def _normalize_result(run: AgentRun, result) -> None:
+    """Normalize an agent's raw return value into the AgentRun fields."""
+    if isinstance(result, dict):
+        run.output = result.get("output", result.get("response", str(result)))
+        run.tool_calls = result.get("tool_calls", result.get("intermediate_steps", []))
+        run.reasoning_steps = result.get("reasoning_steps", result.get("thoughts", []))
+        run.tokens_used = result.get("usage", {}).get("total_tokens", 0)
+        run.metadata = {k: v for k, v in result.items()
+                        if k not in ("output", "tool_calls", "reasoning_steps")}
+    elif isinstance(result, str):
+        run.output = result
+    else:
+        run.output = str(result)
+
+
 def _wrap_agent_as_invoke(raw_agent: Callable) -> Callable:
     """
     Wrap a raw agent callable so it returns AgentRun instead of raw output.
     This ensures @agent_test functions receive proper AgentRun objects.
+
+    If the agent is async, an async wrapper is returned; otherwise a sync one.
     """
     import time as _time
+
+    if inspect.iscoroutinefunction(raw_agent):
+        async def wrapped_invoke(input_text: str, **kwargs) -> AgentRun:
+            start = _time.perf_counter()
+            run = AgentRun(input=input_text, output="")
+            try:
+                _normalize_result(run, await raw_agent(input_text, **kwargs))
+            except Exception as e:
+                run.error = e
+            run.duration_ms = (_time.perf_counter() - start) * 1000
+            return run
+        return wrapped_invoke
 
     def wrapped_invoke(input_text: str, **kwargs) -> AgentRun:
         start = _time.perf_counter()
         run = AgentRun(input=input_text, output="")
         try:
-            result = raw_agent(input_text, **kwargs)
-            if isinstance(result, dict):
-                run.output = result.get("output", result.get("response", str(result)))
-                run.tool_calls = result.get("tool_calls", result.get("intermediate_steps", []))
-                run.reasoning_steps = result.get("reasoning_steps", result.get("thoughts", []))
-                run.tokens_used = result.get("usage", {}).get("total_tokens", 0)
-                run.metadata = {k: v for k, v in result.items()
-                                if k not in ("output", "tool_calls", "reasoning_steps")}
-            elif isinstance(result, str):
-                run.output = result
-            else:
-                run.output = str(result)
+            _normalize_result(run, raw_agent(input_text, **kwargs))
         except Exception as e:
             run.error = e
         run.duration_ms = (_time.perf_counter() - start) * 1000
         return run
+
+    return wrapped_invoke
+
+
+def _wrap_agent_as_sync_invoke(raw_agent: Callable) -> Callable:
+    """
+    Wrap an (optionally async) agent into a *sync* AgentRun-returning callable.
+
+    For async agents, this runs the coroutine via ``asyncio.run`` internally,
+    so sync test functions can call it without awaiting.
+    """
+    import asyncio
+
+    async_wrapper = _wrap_agent_as_invoke(raw_agent)
+    if not inspect.iscoroutinefunction(async_wrapper):
+        return async_wrapper
+
+    def wrapped_invoke(input_text: str, **kwargs) -> AgentRun:
+        return asyncio.run(async_wrapper(input_text, **kwargs))
 
     return wrapped_invoke
 
@@ -131,21 +169,31 @@ class AgentTestRunner:
         return all_results[0]
 
     def _execute(self, name: str, fn: Callable, test_info: dict, run_index: int = 0) -> TestResult:
+        import asyncio
+
         start = time.perf_counter()
         result = TestResult(test_name=name, status=TestStatus.RUNNING)
 
         try:
-            # Determine how to call the test
-            import inspect
             sig = inspect.signature(fn)
             params = list(sig.parameters.keys())
+            fn_is_async = inspect.iscoroutinefunction(fn)
 
             if "agent" in params and "agent" in test_info:
-                # Wrap the raw agent so the test function receives AgentRun objects
-                wrapped = _wrap_agent_as_invoke(test_info["agent"])
-                fn(wrapped)
+                raw_agent = test_info["agent"]
+                if fn_is_async:
+                    # async test fn: use an async wrapper (await inside fn)
+                    wrapped = _wrap_agent_as_invoke(raw_agent)
+                    asyncio.run(fn(wrapped))
+                else:
+                    # sync test fn: use a sync wrapper (handles async agents)
+                    wrapped = _wrap_agent_as_sync_invoke(raw_agent)
+                    fn(wrapped)
             else:
-                fn()
+                if fn_is_async:
+                    asyncio.run(fn())
+                else:
+                    fn()
 
             result.status = TestStatus.PASSED
 

@@ -109,3 +109,75 @@ def assert_tool_reasoning_alignment(run: AgentRun):
             f"This may indicate the agent is calling tools without proper justification."
         )
 
+
+def assert_reasoning_steps(run: AgentRun, min_steps: int = 1):
+    """Assert the agent produced at least ``min_steps`` reasoning steps."""
+    assert_step_count(run, min_steps=min_steps)
+
+
+def assert_reasoning_covers(run: AgentRun, topics: List[str], case_sensitive: bool = False):
+    """
+    Assert that every topic keyword appears somewhere in the reasoning trace.
+
+    Example:
+        assert_reasoning_covers(run, ["risk_analysis", "rollback_plan"])
+    """
+    reasoning_text = "\n".join(run.reasoning_steps)
+    if not case_sensitive:
+        reasoning_text = reasoning_text.lower()
+
+    missing = []
+    for topic in topics:
+        needle = topic if case_sensitive else topic.lower()
+        if needle not in reasoning_text:
+            missing.append(topic)
+
+    if missing:
+        raise AssertionError(
+            f"Reasoning trace does not cover topics: {missing}.\n"
+            f"Reasoning steps:\n" + "\n".join(f"  [{i}] {s}" for i, s in enumerate(run.reasoning_steps))
+        )
+
+
+def assert_reasoning_order(run: AgentRun, expected_order: List[str], case_sensitive: bool = False):
+    """
+    Assert topics appear in the reasoning trace in the given order.
+
+    Example:
+        assert_reasoning_order(run, ["analyze", "plan", "validate"])
+    """
+    reasoning_text = "\n".join(run.reasoning_steps)
+    if not case_sensitive:
+        reasoning_text = reasoning_text.lower()
+
+    positions = []
+    for topic in expected_order:
+        needle = topic if case_sensitive else topic.lower()
+        pos = reasoning_text.find(needle)
+        if pos == -1:
+            raise AssertionError(
+                f"Topic '{topic}' not found in reasoning trace (expected order {expected_order})."
+            )
+        positions.append(pos)
+
+    if positions != sorted(positions):
+        raise AssertionError(
+            f"Reasoning topics out of order. Expected {expected_order}, "
+            f"but found them in a different sequence in the trace."
+        )
+
+
+def assert_reasoning_time(run: AgentRun, max_seconds: float):
+    """
+    Assert the agent completed reasoning within ``max_seconds``.
+
+    Example:
+        assert_reasoning_time(run, max_seconds=30)
+    """
+    max_ms = max_seconds * 1000
+    if run.duration_ms > max_ms:
+        raise AssertionError(
+            f"Agent reasoning took {run.duration_ms/1000:.2f}s, "
+            f"exceeding max allowed {max_seconds}s"
+        )
+

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AgentTest Editor</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #0f1117; color: #e6e6e6; margin: 0; padding: 24px;
+    max-width: 900px; margin: 0 auto;
+  }
+  h1 { font-size: 22px; }
+  h1 span { color: #6ea8fe; }
+  label { display: block; margin: 14px 0 4px; font-weight: 600; font-size: 13px; }
+  input, textarea, select {
+    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #2a2e3a;
+    background: #171a23; color: #e6e6e6; font-size: 14px; font-family: inherit;
+  }
+  textarea { min-height: 70px; resize: vertical; }
+  .assertion-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .assertion-row select { flex: 1; }
+  .assertion-row input { flex: 2; }
+  .assertion-row button { flex: 0 0 auto; }
+  button {
+    background: #2d7ff9; color: #fff; border: none; padding: 10px 16px;
+    border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;
+  }
+  button.ghost { background: transparent; border: 1px solid #3a4050; }
+  button.danger { background: transparent; color: #ff7b72; border: 1px solid #3a4050; }
+  pre {
+    background: #0a0c12; border: 1px solid #2a2e3a; border-radius: 8px;
+    padding: 14px; overflow-x: auto; font-size: 12.5px; line-height: 1.5;
+  }
+  .actions { display: flex; gap: 10px; margin-top: 20px; }
+</style>
+</head>
+<body>
+  <h1>AgentTest <span>Visual Editor</span></h1>
+  <p>Build agent test cases visually, then export to Python.</p>
+
+  <label for="test-name">Test name</label>
+  <input id="test-name" placeholder="customer_refund_flow" />
+
+  <label for="test-input">Agent input</label>
+  <textarea id="test-input" placeholder="I want to return my order #12345"></textarea>
+
+  <label>Assertions</label>
+  <div id="assertions"></div>
+  <button class="ghost" id="add-assertion">+ Add assertion</button>
+
+  <div class="actions">
+    <button id="generate">Generate Python</button>
+    <button class="ghost" id="copy">Copy</button>
+  </div>
+
+  <label>Generated code</label>
+  <pre id="output"></pre>
+
+<script>
+const ASSERTION_TYPES = [
+  { value: "assert_tool_called", label: "Tool called", argHint: "tool_name" },
+  { value: "assert_output_contains", label: "Output contains", argHint: "text" },
+  { value: "assert_output_matches", label: "Output matches regex", argHint: "pattern" },
+  { value: "assert_step_count", label: "Min reasoning steps", argHint: "min_steps" },
+];
+
+function addAssertion() {
+  const row = document.createElement("div");
+  row.className = "assertion-row";
+
+  const select = document.createElement("select");
+  for (const a of ASSERTION_TYPES) {
+    const opt = document.createElement("option");
+    opt.value = a.value; opt.textContent = a.label;
+    select.appendChild(opt);
+  }
+
+  const input = document.createElement("input");
+  input.placeholder = "argument";
+
+  const remove = document.createElement("button");
+  remove.textContent = "✕"; remove.className = "danger";
+  remove.onclick = () => row.remove();
+
+  row.appendChild(select); row.appendChild(input); row.appendChild(remove);
+  document.getElementById("assertions").appendChild(row);
+}
+
+function generate() {
+  const name = document.getElementById("test-name").value.trim() || "my_agent_test";
+  const input = document.getElementById("test-input").value || "Hello!";
+  const rows = [...document.querySelectorAll(".assertion-row")];
+
+  const lines = [];
+  lines.push("import agenttest as at");
+  lines.push("");
+  lines.push(`@at.agent_test(name="${name}")`);
+  lines.push("def " + name + "(agent):");
+  lines.push(`    run = agent(${JSON.stringify(input)})`);
+  for (const row of rows) {
+    const sel = row.querySelector("select").value;
+    const arg = row.querySelector("input").value.trim();
+    if (arg) lines.push(`    at.${sel}(run, ${JSON.stringify(arg)})`);
+    else lines.push(`    at.${sel}(run)`);
+  }
+  lines.push("");
+  document.getElementById("output").textContent = lines.join("\n");
+}
+
+document.getElementById("add-assertion").onclick = addAssertion;
+document.getElementById("generate").onclick = generate;
+document.getElementById("copy").onclick = () => {
+  const text = document.getElementById("output").textContent;
+  navigator.clipboard.writeText(text);
+};
+addAssertion();
+generate();
+</script>
+</body>
+</html>
