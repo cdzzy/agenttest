@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agenttest"
-version = "0.2.0"
-description = "The testing framework for AI agents â€” think pytest, but for agents."
+version = "0.3.0"
+description = "The testing framework for AI agents â€?think pytest, but for agents."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [

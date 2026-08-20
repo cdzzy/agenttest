@@ -2,6 +2,12 @@
 
 All notable changes to AgentTest are documented in this file.
 
+## [0.3.0] - 2026-08-19
+
+### Added
+
+- **HTML/JSON test reports**: `report.py` renders `List[TestResult]` into a self-contained HTML report (summary cards + per-test table + failure details) or a JSON report for CI tooling. `save_report()` infers format from the extension; `AgentTestRunner.run_suite_with_report(suite, path)` runs and writes in one call.
+
 ## [0.2.0] - 2026-08-15
 
 ### Added

@@ -26,8 +26,9 @@ from agenttest.benchmark import BenchmarkSuite, Scenario, BenchmarkResults
 from agenttest.chaos import ChaosScenario, ChaosAgent, inject_chaos, run_chaos, measure_resilience
 from agenttest.flakiness import FlakinessDetector, FlakyReport
 from agenttest.mcp_tools import MCPServerClient, MCPTool, assert_tool_exists, assert_tool_response_valid
+from agenttest.report import save_report, build_report, report_to_json, report_to_html
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = [
     "AgentTestCase",
     "AgentTestSuite",
@@ -69,5 +70,9 @@ __all__ = [
     "MCPTool",
     "assert_tool_exists",
     "assert_tool_response_valid",
+    "save_report",
+    "build_report",
+    "report_to_json",
+    "report_to_html",
 ]
 

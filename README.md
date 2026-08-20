@@ -374,7 +374,7 @@ python examples/test_scenarios.py
 - [x] **Reasoning model assertions** ✅ (agenttest/assertions/trace.py, v0.2.0)
 - [x] **Visual test editor** ✅ (agenttest/ui/editor.html, v0.2.0)
 - [x] **GitHub Action** ✅ (action.yml, v0.2.0)
-- [ ] HTML/JSON test reports
+- [x] **HTML/JSON test reports** ✅ (agenttest/report.py, v0.3.0)
 - [ ] Pytest plugin (`pytest-agenttest`)
 - [x] ~~LLM-as-judge assertions~~ ✅ (examples/test_llm_judge.py)
 - [x] ~~GitHub Actions template~~ ✅ (.github/workflows/ci.yml)

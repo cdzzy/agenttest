@@ -123,6 +123,40 @@ class AgentTestRunner:
 
         return results
 
+    def run_suite_with_report(
+        self,
+        suite: AgentTestSuite,
+        report_path: str,
+        verbose: Optional[bool] = None,
+    ) -> List[TestResult]:
+        """
+        Run a suite and write an HTML/JSON report in one call.
+
+        Args:
+            suite: The suite to run.
+            report_path: Output path (``.html`` or ``.json``).
+            verbose: Override the runner's verbose flag for this run.
+
+        Returns:
+            The list of TestResults (and writes the report file).
+
+        Example::
+
+            runner = AgentTestRunner(verbose=True)
+            runner.run_suite_with_report(suite, "report.html")
+        """
+        from agenttest.report import save_report
+
+        prev = self.verbose
+        if verbose is not None:
+            self.verbose = verbose
+        try:
+            results = self.run_suite(suite)
+        finally:
+            self.verbose = prev
+        save_report(results, report_path)
+        return results
+
     def run_function(self, fn: Callable, agent: Callable, name: Optional[str] = None) -> TestResult:
         """Run a single test function directly."""
         test_info = {
