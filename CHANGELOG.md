@@ -2,6 +2,12 @@
 
 All notable changes to AgentTest are documented in this file.
 
+## [0.4.0] - 2026-08-27
+
+### Added
+
+- **Pytest plugin** (`pytest11` entry point): run `@agent_test` functions under vanilla pytest. Provides the `agent` fixture (resolvable via the `agenttest_agent` ini key / `--agenttest-agent` CLI option, or a conftest override), honors `repeat=N` as stability aggregation (all runs must pass), and maps `skip=True` to pytest skip markers. Non-agent tests are untouched.
+
 ## [0.3.0] - 2026-08-19
 
 ### Added
