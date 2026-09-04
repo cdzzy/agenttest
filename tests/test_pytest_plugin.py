@@ -12,7 +12,22 @@ import pytest
 
 pytest_plugins = ["pytester"]
 
-PLUGIN_ARGS = ("-p", "agenttest.pytest_plugin")
+
+def _plugin_autoloaded() -> bool:
+    """True when the agenttest pytest11 entry point is registered (pip install)."""
+    try:
+        from importlib.metadata import entry_points
+
+        return any(ep.name == "agenttest" for ep in entry_points(group="pytest11"))
+    except Exception:
+        return False
+
+
+# When the package is installed (CI), the plugin auto-loads via its entry
+# point; force-loading it again with -p would raise "Plugin already
+# registered under a different name". When running from a source checkout
+# without installation, force-load explicitly.
+PLUGIN_ARGS: tuple = () if _plugin_autoloaded() else ("-p", "agenttest.pytest_plugin")
 
 AGENT_MODULE = '''
 def my_agent(text):
