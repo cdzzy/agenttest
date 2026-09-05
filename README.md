@@ -1,6 +1,7 @@
 ﻿# agenttest 🧪
 
 > Part of the [Agent OS](https://github.com/cdzzy/agent-kernel/blob/main/docs/agent-os.md) suite — kernel · network · memory · policy · audit · testing
+[![PyPI](https://img.shields.io/pypi/v/cdzzy-agenttest?color=blue)](https://pypi.org/project/cdzzy-agenttest/)
 
 
 **The testing framework for AI agents.**
