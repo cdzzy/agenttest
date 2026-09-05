@@ -1,5 +1,8 @@
 ﻿# agenttest 🧪
 
+> Part of the [Agent OS](https://github.com/cdzzy/agent-kernel/blob/main/docs/agent-os.md) suite — kernel · network · memory · policy · audit · testing
+
+
 **The testing framework for AI agents.**
 
 Think `pytest` — but for agents.
