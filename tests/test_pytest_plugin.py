@@ -41,7 +41,7 @@ class TestPytestPlugin:
             def test_normal():
                 assert 1 + 1 == 2
         """)
-        result = pytester.runpytest(*PLUGIN_ARGS)
+        result = pytester.runpytest_subprocess(*PLUGIN_ARGS)
         result.assert_outcomes(passed=1)
 
     def test_agent_test_with_ini_agent(self, pytester):
@@ -57,7 +57,7 @@ class TestPytestPlugin:
                 run = agent("hello")
                 assert run.output == "echo: hello"
         """)
-        result = pytester.runpytest(*PLUGIN_ARGS)
+        result = pytester.runpytest_subprocess(*PLUGIN_ARGS)
         result.assert_outcomes(passed=1)
 
     def test_agent_test_via_cli_option(self, pytester):
@@ -70,7 +70,7 @@ class TestPytestPlugin:
                 run = agent("hi")
                 assert "echo: hi" in run.output
         """)
-        result = pytester.runpytest(
+        result = pytester.runpytest_subprocess(
             *PLUGIN_ARGS, "--agenttest-agent", "agents_mod:my_agent"
         )
         result.assert_outcomes(passed=1)
@@ -91,7 +91,7 @@ class TestPytestPlugin:
                 if counter["n"] == 2:
                     raise AssertionError("second run failed")
         """)
-        result = pytester.runpytest(*PLUGIN_ARGS)
+        result = pytester.runpytest_subprocess(*PLUGIN_ARGS)
         result.assert_outcomes(failed=1)
         result.stdout.fnmatch_lines(["*Stability: 2/3 runs passed*"])
 
@@ -108,7 +108,7 @@ class TestPytestPlugin:
                 run = agent("x")
                 assert run.output == "echo: x"
         """)
-        result = pytester.runpytest(*PLUGIN_ARGS)
+        result = pytester.runpytest_subprocess(*PLUGIN_ARGS)
         result.assert_outcomes(passed=1)
 
     def test_skip_marker(self, pytester):
@@ -123,7 +123,7 @@ class TestPytestPlugin:
             def test_skipped(agent):
                 assert False
         """)
-        result = pytester.runpytest(*PLUGIN_ARGS)
+        result = pytester.runpytest_subprocess(*PLUGIN_ARGS)
         result.assert_outcomes(skipped=1)
 
     def test_missing_agent_config_fails_with_hint(self, pytester):
@@ -134,7 +134,7 @@ class TestPytestPlugin:
             def test_needs_agent(agent):
                 assert True
         """)
-        result = pytester.runpytest(*PLUGIN_ARGS)
+        result = pytester.runpytest_subprocess(*PLUGIN_ARGS)
         result.assert_outcomes(errors=1)
         result.stdout.fnmatch_lines(["*No agent configured for agenttest*"])
 
@@ -147,5 +147,5 @@ class TestPytestPlugin:
             def test_no_agent_needed():
                 assert True
         """)
-        result = pytester.runpytest(*PLUGIN_ARGS)
+        result = pytester.runpytest_subprocess(*PLUGIN_ARGS)
         result.assert_outcomes(passed=1)

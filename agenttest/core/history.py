@@ -130,12 +130,21 @@ class SuiteRunHistory:
 
         try:
             from statistics import linear_regression
-        except ImportError:  # pragma: no cover - Python < 3.10
-            return None
+        except ImportError:  # Python 3.9 fallback: plain OLS slope
+            linear_regression = None
 
         xs = list(range(len(summaries)))
         ys = [s.pass_rate for s in summaries]
-        slope, _intercept = linear_regression(xs, ys)
+        if linear_regression is not None:
+            slope, _intercept = linear_regression(xs, ys)
+        else:
+            n = len(xs)
+            mean_x = sum(xs) / n
+            mean_y = sum(ys) / n
+            slope = sum(
+                (x - mean_x) * (y - mean_y) for x, y in zip(xs, ys)
+            ) / sum((x - mean_x) ** 2 for x in xs)
+            _intercept = mean_y - slope * mean_x
 
         if slope > 0.005:
             direction = "improving"
