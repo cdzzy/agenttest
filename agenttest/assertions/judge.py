@@ -21,7 +21,7 @@ Usage:
 
 import json
 import re
-from typing import Optional, Callable, Any
+from typing import Any, Callable, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
 
@@ -102,7 +102,7 @@ Consider: speculation presented as fact, confidence calibration, uncertainty exp
     
     def __init__(
         self,
-        criteria: str | JudgeCriterion,
+        criteria: Union[str, JudgeCriterion],
         llm_fn: Optional[Callable[[str], str]] = None,
         threshold: float = 0.7,
         custom_prompt: Optional[str] = None,
@@ -296,7 +296,7 @@ class JudgeAssertionMixin:
     def assert_judge_passes(
         self,
         run,
-        criteria: str | JudgeCriterion,
+        criteria: Union[str, JudgeCriterion],
         llm_fn: Optional[Callable[[str], str]] = None,
         msg: Optional[str] = None,
     ) -> JudgeResult:
@@ -328,7 +328,7 @@ class JudgeAssertionMixin:
     def assert_judge_score_above(
         self,
         run,
-        criteria: str | JudgeCriterion,
+        criteria: Union[str, JudgeCriterion],
         min_score: float,
         llm_fn: Optional[Callable[[str], str]] = None,
         msg: Optional[str] = None,
