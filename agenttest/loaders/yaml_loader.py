@@ -18,8 +18,11 @@ from __future__ import annotations
 
 import yaml
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Callable
 from dataclasses import dataclass, field
+
+if TYPE_CHECKING:  # pragma: no cover - forward reference only
+    from agenttest.core.suite import AgentTestSuite
 
 
 @dataclass

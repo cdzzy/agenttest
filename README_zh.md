@@ -1,10 +1,11 @@
 ﻿# agenttest 🧪
 
-**AI 智能体的 pytest —— 用你已经熟悉的方式测试工具调用、输出行为和端到端链路。**
+**面向 AI 智能体的混沌工程与确定性测试框架。**
 
-不再凭感觉判断智能体"看起来正常"。agenttest 给 AI 智能体带来真正的软件工程测试能力：断言工具调用、验证输出行为、检测行为回归。
+不再凭感觉判断智能体"看起来正常"。agenttest 给 AI 智能体带来真正的软件工程测试能力：断言工具调用、验证输出行为、检测行为回归，并用混沌工程主动注入故障，验证智能体的生产韧性。
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue)](pyproject.toml)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue)](pyproject.toml)
+[![CI](https://github.com/cdzzy/agenttest/actions/workflows/ci.yml/badge.svg)](https://github.com/cdzzy/agenttest/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](tests/)
 
@@ -27,6 +28,7 @@
 
 ## 功能特性
 
+- 🌪️ **混沌工程** — 向智能体注入 LLM 超时、限流、工具故障、提示注入等 6 类故障场景，量化优雅降级率与平均恢复耗时
 - 🧪 **pytest 风格** — 零学习成本，现有测试工程师直接上手
 - 🔧 **工具调用断言** — 验证工具名称、参数、调用顺序
 - 📸 **快照测试** — 捕获智能体行为，自动检测意外回归
@@ -34,6 +36,33 @@
 - 🎭 **Mock LLM** — 固定 LLM 返回值，实现确定性测试
 - ⚡ **原生 Async 支持** — 无需 `asyncio.run()`，自动处理异步测试
 - 📊 **覆盖率报告** — 工具覆盖率、场景覆盖率、边缘案例统计
+
+---
+
+## 混沌工程
+
+生产环境的智能体失败方式，单测永远覆盖不到：LLM 超时、工具报错、任务中途被限流、遭遇提示注入。`agenttest.chaos` 确定性注入这些故障，并度量智能体的应对能力：
+
+```python
+from agenttest.chaos import ChaosScenario, ChaosAgent, inject_chaos, measure_resilience
+
+# 包装任意 agent 可调用对象 —— 下一次调用即注入故障
+chaotic = ChaosAgent(my_agent)
+chaotic.inject(ChaosScenario.TOOL_ERROR)
+run = chaotic("总结这份文档")
+
+# pytest 风格按测试注入
+@inject_chaos(ChaosScenario.LLM_TIMEOUT)
+def test_timeout_resilience(agent):
+    run = agent("法国的首都是哪里？")
+    assert run.output  # 优雅降级，而不是直接崩溃
+
+# 扫描全部故障场景，量化韧性
+metrics = measure_resilience(my_agent, scenarios=list(ChaosScenario), input_text="总结这份文档")
+print(f"优雅率 {metrics.graceful_rate:.0%} · 崩溃率 {metrics.fail_rate:.0%} · 平均恢复 {metrics.avg_recovery_ms:.0f}ms")
+```
+
+内置场景：`LLM_TIMEOUT`、`RATE_LIMIT`、`CORRUPT_CONTEXT`、`PROMPT_INJECTION`、`TOOL_ERROR`、`NETWORK_ERROR`。
 
 ---
 

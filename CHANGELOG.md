@@ -2,6 +2,17 @@
 
 All notable changes to AgentTest are documented in this file.
 
+## [0.4.1] - 2026-09-20
+
+### Changed
+
+- README repositioned around chaos engineering and deterministic testing (English + Chinese).
+- CI: test matrix 3.9–3.13 with fail-fast off, coverage on 3.12, and a dedicated ruff lint job scoped to error-class checks.
+
+### Fixed
+
+- Missing `TYPE_CHECKING` import in `agenttest/loaders/yaml_loader.py` (ruff F821); no runtime change.
+
 ## [0.4.0] - 2026-08-27
 
 ### Added

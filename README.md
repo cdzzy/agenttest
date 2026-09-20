@@ -2,11 +2,12 @@
 
 > Part of the [Agent OS](https://github.com/cdzzy/agent-kernel/blob/main/docs/agent-os.md) suite — kernel · network · memory · policy · audit · testing
 [![PyPI](https://img.shields.io/pypi/v/cdzzy-agenttest?color=blue)](https://pypi.org/project/cdzzy-agenttest/)
+[![CI](https://github.com/cdzzy/agenttest/actions/workflows/ci.yml/badge.svg)](https://github.com/cdzzy/agenttest/actions/workflows/ci.yml)
 
 
-**The testing framework for AI agents.**
+**Chaos engineering and deterministic testing for agents.**
 
-Think `pytest` — but for agents.
+Think `pytest` — but for agents: assert on tool calls, outputs, and reasoning, then break things on purpose to prove your agent survives production.
 
 ---
 
@@ -18,6 +19,43 @@ Software engineering has unit tests, integration tests, and CI/CD pipelines. But
 - Did it reason through the problem, or just guess?
 
 `agenttest` fills this gap. It's a lightweight, zero-dependency testing framework that gives agent engineers the primitives to write real tests for real agent behavior.
+
+---
+
+## Chaos Engineering — break your agent on purpose
+
+Production agents fail in ways unit tests never exercise: the LLM times out, a tool errors, a rate limit hits mid-task, a prompt injection arrives. `agenttest.chaos` injects those failures deterministically and measures how your agent copes:
+
+```python
+from agenttest.chaos import (
+    ChaosScenario, ChaosAgent, inject_chaos, run_chaos, measure_resilience,
+)
+
+# Wrap any agent callable — the next invocation receives the injected failure
+chaotic = ChaosAgent(my_agent)
+chaotic.inject(ChaosScenario.TOOL_ERROR)
+run = chaotic("Summarize this document")
+
+# Per-test, pytest-style
+@inject_chaos(ChaosScenario.LLM_TIMEOUT)
+def test_timeout_resilience(agent):
+    run = agent("What is the capital of France?")
+    assert run.output  # graceful degradation, not a crash
+
+# One-shot run with a verdict
+result = run_chaos(my_agent, ChaosScenario.RATE_LIMIT, "Search for flights")
+print(result.graceful)  # True if the agent failed without crashing
+
+# Sweep every failure mode and quantify resilience
+metrics = measure_resilience(
+    my_agent,
+    scenarios=list(ChaosScenario),
+    input_text="Summarize this document",
+)
+print(f"{metrics.graceful_rate:.0%} graceful · {metrics.fail_rate:.0%} crashed · {metrics.avg_recovery_ms:.0f}ms avg")
+```
+
+Built-in scenarios: `LLM_TIMEOUT`, `RATE_LIMIT`, `CORRUPT_CONTEXT`, `PROMPT_INJECTION`, `TOOL_ERROR`, `NETWORK_ERROR`. Pair with `StabilityAssertion` (below) for repeat-run determinism, and with snapshots for regression detection.
 
 ---
 
