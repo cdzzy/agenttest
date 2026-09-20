@@ -18,7 +18,13 @@ def _plugin_autoloaded() -> bool:
     try:
         from importlib.metadata import entry_points
 
-        return any(ep.name == "agenttest" for ep in entry_points(group="pytest11"))
+        eps = entry_points()
+        # Python 3.10+: EntryPoints is selectable; 3.9: dict-like mapping.
+        if hasattr(eps, "select"):
+            eps = eps.select(group="pytest11")
+        else:
+            eps = eps.get("pytest11", [])
+        return any(ep.name == "agenttest" for ep in eps)
     except Exception:
         return False
 
