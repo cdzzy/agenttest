@@ -5,10 +5,11 @@ Uses pytest's ``pytester`` fixture to run real pytest sessions against
 inline test files with the plugin force-loaded.
 """
 
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import pytest
 
 pytest_plugins = ["pytester"]
 

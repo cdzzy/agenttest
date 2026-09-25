@@ -11,10 +11,6 @@ Usage:
 
 from agenttest.loaders.yaml_loader import (
     YAMLTestLoader,
-    YAMLTestSuite,
-    YAMLCase,
-    create_test_from_yaml,
-    validate_yaml_syntax,
 )
 
 
@@ -143,8 +139,8 @@ cases:
       - "wip"
 """
 
-    import tempfile
     import os
+    import tempfile
 
     # Write to temp file
     with tempfile.NamedTemporaryFile(

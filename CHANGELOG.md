@@ -2,6 +2,19 @@
 
 All notable changes to AgentTest are documented in this file.
 
+## [0.4.2] - 2026-09-25
+
+### Changed
+
+- Ruff rule selection declared in `pyproject.toml` (`E4/E7/E9/F/I`) and pinned `ruff==0.16.8` in CI; the lint job now runs `ruff check .` over the whole repo. Typing-modernization rules are deliberately excluded to stay Python 3.9 compatible.
+- `__version__` fixed — it had lagged at 0.4.0 while the package was already at 0.4.1.
+
+### Fixed
+
+- 85 ruff findings fixed repo-wide: unused imports (F401), placeholder-less f-strings (F541), unsorted/multiple imports (I001/E401), dead variables (F841), and an ambiguous loop variable (E741).
+- Assertion submodules now declare explicit `__all__`, documenting the public API surface.
+- `TestStatus` / `TestResult` set `__test__ = False`, so pytest no longer emits collection warnings when test modules import them.
+
 ## [0.4.1] - 2026-09-20
 
 ### Changed

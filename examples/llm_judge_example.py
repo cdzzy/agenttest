@@ -6,7 +6,6 @@ agentlink examples: LLM-as-Judge Evaluation Framework
 使用 LLM 来判断 Agent 输出的质量。
 """
 
-import json
 from typing import Optional
 
 
@@ -34,9 +33,9 @@ class LLMJudge:
         if criteria is None:
             criteria = ["correctness", "relevance", "safety", "clarity"]
 
-        evaluation_prompt = self._build_prompt(task, agent_output, criteria)
+        _evaluation_prompt = self._build_prompt(task, agent_output, criteria)
         # 实际使用时调用 LLM API
-        # judge_response = call_llm(self.judge_model, evaluation_prompt)
+        # judge_response = call_llm(self.judge_model, _evaluation_prompt)
         judge_response = self._mock_judge(agent_output)
 
         record = {

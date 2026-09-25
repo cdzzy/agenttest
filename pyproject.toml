@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cdzzy-agenttest"
-version = "0.4.1"
+version = "0.4.2"
 description = "The testing framework for AI agents — think pytest, but for agents."
 readme = "README.md"
 license = {text = "MIT"}
@@ -69,6 +69,18 @@ target-version = ["py39", "py310", "py311"]
 
 [tool.ruff]
 line-length = 100
+
+[tool.ruff.lint]
+# E4/E7/E9 + F + I mirrors the lint job in CI; typing-modernization rules
+# (UP) are intentionally excluded — the package supports Python 3.9.
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+# Package __init__ modules intentionally re-export the public API.
+"**/__init__.py" = ["F401"]
+# ruff does not resolve __all__ for star imports (unlike pyflakes); the
+# submodules below define __all__ explicitly, making these re-exports safe.
+"agenttest/assertions/__init__.py" = ["F403"]
 
 [tool.mypy]
 python_version = "3.9"

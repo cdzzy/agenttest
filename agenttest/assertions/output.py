@@ -6,9 +6,20 @@ These assertions answer: "Is the agent's output correct and appropriate?"
 from __future__ import annotations
 
 import re
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from agenttest.core.case import AgentRun
+
+__all__ = [
+    "assert_output_contains",
+    "assert_output_not_contains",
+    "assert_output_matches",
+    "assert_output_length",
+    "assert_output_sentiment",
+    "assert_output_contains_all",
+    "assert_output_json",
+    "assert_output_json_schema",
+]
 
 
 def _normalize_text(text: str, case_sensitive: bool) -> str:

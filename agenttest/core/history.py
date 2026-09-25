@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
@@ -115,7 +115,7 @@ class SuiteRunHistory:
         limit = window or self.window
         lines = self.path.read_text(encoding="utf-8").strip().splitlines()
         recent = lines[-limit:] if limit else lines
-        return [RunSummary.from_dict(json.loads(l)) for l in recent if l.strip()]
+        return [RunSummary.from_dict(json.loads(line)) for line in recent if line.strip()]
 
     def analyze(self) -> Optional[RunTrendReport]:
         """

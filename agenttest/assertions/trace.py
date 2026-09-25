@@ -9,6 +9,17 @@ from typing import List, Optional
 
 from agenttest.core.case import AgentRun
 
+__all__ = [
+    "assert_reasoning_step",
+    "assert_step_count",
+    "assert_no_reasoning_loops",
+    "assert_tool_reasoning_alignment",
+    "assert_reasoning_steps",
+    "assert_reasoning_covers",
+    "assert_reasoning_order",
+    "assert_reasoning_time",
+]
+
 
 def assert_reasoning_step(run: AgentRun, keyword: str, case_sensitive: bool = False):
     """
@@ -20,8 +31,8 @@ def assert_reasoning_step(run: AgentRun, keyword: str, case_sensitive: bool = Fa
     """
     if not run.reasoning_steps:
         raise AssertionError(
-            f"No reasoning steps were captured. "
-            f"Make sure your agent returns 'reasoning_steps' or 'thoughts' in its output dict."
+            "No reasoning steps were captured. "
+            "Make sure your agent returns 'reasoning_steps' or 'thoughts' in its output dict."
         )
 
     for step in run.reasoning_steps:

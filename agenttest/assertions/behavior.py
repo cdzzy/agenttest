@@ -9,6 +9,14 @@ from typing import List, Optional
 
 from agenttest.core.case import AgentRun
 
+__all__ = [
+    "assert_tool_called",
+    "assert_no_tool_called",
+    "assert_tool_sequence",
+    "assert_tool_called_before",
+    "assert_max_tool_calls",
+]
+
 
 def assert_tool_called(run: AgentRun, tool_name: str, times: Optional[int] = None):
     """

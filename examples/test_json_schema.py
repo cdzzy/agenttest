@@ -109,7 +109,6 @@ class StructuredOutputTests(AgentTestCase):
 
 
 if __name__ == "__main__":
-    import sys
     print("Run with: pytest test_json_schema.py -v")
     print()
 

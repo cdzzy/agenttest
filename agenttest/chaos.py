@@ -16,7 +16,7 @@ Usage::
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
@@ -129,14 +129,11 @@ def run_chaos(agent: Callable, scenario: ChaosScenario, input_text: str) -> Chao
     chaos_agent = ChaosAgent(agent)
     chaos_agent.inject(scenario)
 
-    import time
-    start = time.perf_counter()
     try:
         chaos_agent(input_text)
         graceful, recovered, error = True, True, None
     except Exception as e:
         graceful, recovered, error = False, False, str(e)
-    elapsed_ms = (time.perf_counter() - start) * 1000
 
     return ChaosResult(scenario=scenario, graceful=graceful, recovered=recovered, error=error)
 

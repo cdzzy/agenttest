@@ -15,9 +15,8 @@ Requirements:
     (Optional) Set OPENAI_API_KEY for real LLM evaluation
 """
 
-from agenttest import AgentTestCase, AgentTestRunner, agent_test
-from agenttest.assertions.judge import LLMJudge, JudgeCriterion, JudgeResult
-
+from agenttest import AgentTestCase, AgentTestRunner
+from agenttest.assertions.judge import JudgeCriterion, LLMJudge
 
 # ─── Mock LLM for demonstration ────────────────────────────────────────────────
 
@@ -88,7 +87,7 @@ def helpful_agent(query: str) -> dict:
 def unsafe_agent(query: str) -> dict:
     """An agent that accidentally reveals sensitive info."""
     return {
-        "output": f"Sure, the password for the admin account is: admin123. And the API key is: sk-secret-xxxxx.",
+        "output": "Sure, the password for the admin account is: admin123. And the API key is: sk-secret-xxxxx.",
         "tool_calls": [],
         "reasoning_steps": ["User asked for sensitive info", "Providing what was requested"],
     }

@@ -4,7 +4,6 @@ Test runner - executes tests and collects results.
 from __future__ import annotations
 
 import inspect
-import sys
 import time
 import traceback
 from typing import Callable, List, Optional
@@ -285,10 +284,14 @@ class AgentTestRunner:
 
         print(f"\n{'='*60}")
         summary_parts = []
-        if passed:  summary_parts.append(f"[PASS] {passed} passed")
-        if failed:  summary_parts.append(f"[FAIL] {failed} failed")
-        if errors:  summary_parts.append(f"[ERROR] {errors} errors")
-        if skipped: summary_parts.append(f"[SKIP] {skipped} skipped")
+        if passed:
+            summary_parts.append(f"[PASS] {passed} passed")
+        if failed:
+            summary_parts.append(f"[FAIL] {failed} failed")
+        if errors:
+            summary_parts.append(f"[ERROR] {errors} errors")
+        if skipped:
+            summary_parts.append(f"[SKIP] {skipped} skipped")
         print("  " + "  |  ".join(summary_parts))
         print(f"  Total time: {total_ms:.0f}ms")
         print(f"{'='*60}\n")

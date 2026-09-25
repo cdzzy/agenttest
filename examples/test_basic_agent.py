@@ -4,22 +4,23 @@ Example: Testing a simple LangChain-style agent with agenttest.
 This example shows the most common patterns you'll use day-to-day.
 Run with: python examples/test_basic_agent.py
 """
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agenttest import (
     AgentTestCase,
-    AgentTestSuite,
     AgentTestRunner,
+    AgentTestSuite,
     agent_test,
-    MockTool,
-    MockToolkit,
 )
-from agenttest.assertions.behavior import assert_tool_called, assert_tool_sequence, assert_max_tool_calls
-from agenttest.assertions.output import assert_output_contains, assert_output_length
-from agenttest.assertions.trace import assert_step_count
-
+from agenttest.assertions.behavior import (
+    assert_max_tool_calls,
+    assert_tool_called,
+    assert_tool_sequence,
+)
+from agenttest.assertions.output import assert_output_contains
 
 # ─────────────────────────────────────────────────────────────────
 # Fake agent for demo purposes

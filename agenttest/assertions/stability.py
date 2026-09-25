@@ -6,9 +6,11 @@ These assertions answer: "Is the agent reliable, or does it randomly fail?"
 from __future__ import annotations
 
 import time
-from typing import Callable, List, Optional
+from typing import Callable, List
 
 from agenttest.core.case import AgentRun
+
+__all__ = ["StabilityAssertion"]
 
 
 class StabilityAssertion:

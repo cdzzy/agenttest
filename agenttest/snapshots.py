@@ -28,7 +28,7 @@ import difflib
 import json
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 
 DEFAULT_SNAPSHOT_DIR = "__snapshots__"
 

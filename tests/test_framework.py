@@ -1,20 +1,28 @@
 ﻿"""
 Self-tests for agenttest — verifying the framework itself works.
 """
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
-from agenttest.core.case import AgentRun, AgentTestCase
+
 from agenttest.assertions.behavior import (
-    assert_tool_called, assert_no_tool_called,
-    assert_tool_sequence, assert_tool_called_before, assert_max_tool_calls,
+    assert_max_tool_calls,
+    assert_no_tool_called,
+    assert_tool_called,
+    assert_tool_called_before,
+    assert_tool_sequence,
 )
 from agenttest.assertions.output import (
-    assert_output_contains, assert_output_not_contains,
-    assert_output_matches, assert_output_length,
+    assert_output_contains,
+    assert_output_length,
+    assert_output_matches,
+    assert_output_not_contains,
 )
-from agenttest.assertions.trace import assert_step_count, assert_reasoning_step
+from agenttest.assertions.trace import assert_reasoning_step, assert_step_count
+from agenttest.core.case import AgentRun
 from agenttest.fixtures.mock_tools import MockTool, MockToolkit
 
 

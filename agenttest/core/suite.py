@@ -3,10 +3,9 @@ Test suite for grouping and organizing agent tests.
 """
 from __future__ import annotations
 
-import inspect
 from typing import Any, Callable, Dict, List, Optional, Type
 
-from agenttest.core.case import AgentTestCase, agent_test
+from agenttest.core.case import AgentTestCase
 
 
 class AgentTestSuite:

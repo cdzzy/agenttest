@@ -3,14 +3,14 @@ Example: Stability testing — is your agent reliable across multiple runs?
 
 Run with: python examples/test_stability.py
 """
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import random
-from agenttest import AgentTestSuite, AgentTestRunner
-from agenttest.assertions.stability import StabilityAssertion
-from agenttest.assertions.output import assert_output_contains
 
+from agenttest.assertions.stability import StabilityAssertion
 
 # ─────────────────────────────────────────────────────────────────
 # Fake agents with different stability characteristics

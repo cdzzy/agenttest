@@ -6,7 +6,6 @@ Use these to isolate your agent from external dependencies during testing.
 from __future__ import annotations
 
 from typing import Any, Callable, Dict, List, Optional
-from unittest.mock import MagicMock
 
 
 class MockTool:

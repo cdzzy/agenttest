@@ -6,12 +6,12 @@ Modules:
 """
 
 from agenttest.loaders.yaml_loader import (
+    YAMLCase,
     YAMLTestLoader,
     YAMLTestSuite,
-    YAMLCase,
     create_test_from_yaml,
-    yaml_to_test_cases,
     validate_yaml_syntax,
+    yaml_to_test_cases,
 )
 
 __all__ = [

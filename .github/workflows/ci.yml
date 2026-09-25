@@ -45,7 +45,10 @@ jobs:
           cache: pip
 
       - name: Install lint tool
-        run: pip install ruff
+        run: pip install "ruff==0.16.8"  # pinned for reproducible lint results
 
-      - name: "Ruff — correctness rules (syntax errors, undefined/redefined names)"
-        run: ruff check --select E9,F7,F63,F821,F811 --line-length 100 agenttest tests examples
+      # Rule selection is declared in pyproject.toml ([tool.ruff.lint]):
+      # E4/E7/E9 + F + I — broad enough to catch unused imports and
+      # undefined names while staying Python 3.9 compatible.
+      - name: "Ruff (rules from pyproject.toml)"
+        run: ruff check .

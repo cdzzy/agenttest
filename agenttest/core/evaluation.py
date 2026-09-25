@@ -18,11 +18,10 @@ from __future__ import annotations
 import json
 import time
 import uuid
-from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional
 
 
 class TestStatus(str, Enum):
@@ -287,7 +286,7 @@ class EvalHarness:
                     ended_at=datetime.now(timezone.utc).isoformat(),
                 ))
                 report.suites[-1].cases.append(TestCaseResult(
-                    name=f"suite_error",
+                    name="suite_error",
                     status=TestStatus.ERROR,
                     error_message=f"Suite setup failed: {e}",
                 ))

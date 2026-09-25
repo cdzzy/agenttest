@@ -23,7 +23,7 @@ Usage::
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, Dict, List
 
 from agenttest.core.case import AgentRun
 from agenttest.core.runner import _wrap_agent_as_invoke

@@ -4,10 +4,12 @@ Example: Scenario-driven testing — test multiple inputs systematically.
 Useful for regression testing with a dataset of known inputs/outputs.
 Run with: python examples/test_scenarios.py
 """
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agenttest import AgentTestCase, AgentTestSuite, AgentTestRunner, ScenarioBuilder
+from agenttest import AgentTestCase, AgentTestRunner, AgentTestSuite, ScenarioBuilder
 from agenttest.assertions.behavior import assert_tool_called
 from agenttest.assertions.output import assert_output_contains
 

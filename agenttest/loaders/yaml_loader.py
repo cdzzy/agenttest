@@ -16,10 +16,11 @@ Usage:
 
 from __future__ import annotations
 
-import yaml
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Callable
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+
+import yaml
 
 if TYPE_CHECKING:  # pragma: no cover - forward reference only
     from agenttest.core.suite import AgentTestSuite
@@ -225,7 +226,7 @@ def create_test_from_yaml(
         runner = AgentTestRunner()
         result = runner.run_suite(suite)
     """
-    from agenttest import AgentTestSuite, AgentTestCase
+    from agenttest import AgentTestCase, AgentTestSuite
 
     loader = YAMLTestLoader(yaml_path)
     yaml_suite = loader.load()

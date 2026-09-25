@@ -4,14 +4,17 @@ Core test case definition for AgentTest.
 from __future__ import annotations
 
 import functools
-import inspect
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 
 class TestStatus(Enum):
+    """Status of a test case. ``__test__ = False`` keeps pytest from collecting
+    this helper class when it is imported into test modules."""
+
+    __test__ = False
     PENDING = "pending"
     RUNNING = "running"
     PASSED = "passed"
@@ -57,7 +60,10 @@ class AssertionResult:
 
 @dataclass
 class TestResult:
-    """Full result of a test case execution."""
+    """Full result of a test case execution. ``__test__ = False`` keeps pytest
+    from collecting this helper class when it is imported into test modules."""
+
+    __test__ = False
     test_name: str
     status: TestStatus
     agent_run: Optional[AgentRun] = None

@@ -3,14 +3,16 @@ Tests for HTML/JSON test reports (v0.3.0).
 """
 
 import json
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agenttest.core.case import TestResult, TestStatus
 from agenttest.report import (
     build_report,
-    report_to_json,
     report_to_html,
+    report_to_json,
     save_report,
 )
 

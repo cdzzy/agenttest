@@ -9,18 +9,18 @@ Provides various assertion types for testing AI agents:
 - judge: LLM-as-Judge semantic assertions
 """
 
-from .output import *
 from .behavior import *
+from .output import *
 from .stability import *
 from .trace import *
 
 # Optional: LLM-as-Judge assertions
 try:
     from .judge import (
-        LLMJudge,
-        JudgeResult,
-        JudgeCriterion,
         JudgeAssertionMixin,
+        JudgeCriterion,
+        JudgeResult,
+        LLMJudge,
     )
     __all__ = [
         "LLMJudge",

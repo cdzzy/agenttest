@@ -4,22 +4,20 @@ Example: Testing a LangGraph agent with agenttest.
 Shows how to wrap a LangGraph StateGraph agent for testing.
 Run with: python examples/test_langgraph_agent.py
 """
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agenttest import (
     AgentTestCase,
-    AgentTestSuite,
     AgentTestRunner,
+    AgentTestSuite,
     MockToolkit,
 )
 from agenttest.assertions.behavior import (
-    assert_tool_called,
-    assert_tool_sequence,
     assert_tool_called_before,
 )
-from agenttest.assertions.output import assert_output_contains, assert_output_json
-
 
 # ─────────────────────────────────────────────────────────────────
 # Simulated LangGraph agent wrapper
@@ -104,7 +102,7 @@ class LangGraphAgentTests(AgentTestCase):
 
     def test_mock_tools_were_called(self):
         """Verify that our mock tools were actually invoked."""
-        run = self.invoke("Search for recent Python news")
+        self.invoke("Search for recent Python news")
 
         # Verify through MockTool's own assertions
         self.toolkit["web_search"].assert_called()
