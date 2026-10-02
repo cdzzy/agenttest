@@ -46,6 +46,13 @@ runs:
       run: |
         pytest "${{ inputs.test-dir }}" -v
 
+    - name: Detect flaky tests
+      if: inputs.fail-on-flaky == 'true'
+      shell: bash
+      run: |
+        pytest "${{ inputs.test-dir }}" -q --agenttest-repeat 3 --agenttest-tolerate-flaky
+        python -m agenttest.check_flaky --fail-on-flaky
+
     - name: Upload results
       uses: actions/upload-artifact@v4
       with:

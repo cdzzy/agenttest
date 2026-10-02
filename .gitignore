@@ -38,6 +38,7 @@ ENV/
 .coverage
 htmlcov/
 .tox/
+.agenttest-history.jsonl
 
 # Distribution
 *.tar.gz

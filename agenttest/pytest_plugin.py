@@ -36,6 +36,9 @@ all runs to pass — mirroring the standalone runner's stability aggregation.
 from __future__ import annotations
 
 import inspect
+import json
+import time
+from pathlib import Path
 from typing import Any, Callable, Optional
 
 import pytest
@@ -51,6 +54,22 @@ def pytest_addoption(parser: Any) -> None:
         dest="agenttest_agent",
         default=None,
         help="Agent callable as 'module:attribute' (e.g. 'myapp.agents:support_agent')",
+    )
+    group.addoption(
+        "--agenttest-repeat",
+        action="store",
+        dest="agenttest_repeat",
+        type=int,
+        default=None,
+        help="Override the repeat count for every @agent_test (flaky detection)",
+    )
+    group.addoption(
+        "--agenttest-tolerate-flaky",
+        action="store_true",
+        dest="agenttest_tolerate_flaky",
+        default=False,
+        help="Allow mixed pass/fail outcomes across repeats (defer verdict to "
+             "`python -m agenttest.check_flaky` instead of failing here)",
     )
     parser.addini(
         "agenttest_agent",
@@ -126,24 +145,51 @@ def pytest_pyfunc_call(pyfuncitem: Any) -> Optional[bool]:
         if name in sig.parameters
     }
 
-    repeat = int(getattr(fn, "_repeat", 1) or 1)
-    if repeat <= 1:
-        fn(**kwargs)
-        return True
+    repeat_override = pyfuncitem.config.getoption("agenttest_repeat")
+    repeat = int(repeat_override if repeat_override is not None else getattr(fn, "_repeat", 1) or 1)
 
-    # Stability aggregation: every run must pass (mirrors AgentTestRunner)
-    passed = 0
+    outcomes: list[bool] = []
     first_failure = ""
     for _ in range(repeat):
         try:
             fn(**kwargs)
-            passed += 1
+            outcomes.append(True)
         except Exception as e:  # noqa: BLE001 - aggregate below
+            outcomes.append(False)
             if not first_failure:
                 first_failure = str(e)
+
+    _record_outcome(pyfuncitem.name, outcomes)
+
+    passed = sum(outcomes)
     if passed < repeat:
+        flaky = passed > 0
+        if flaky and pyfuncitem.config.getoption("agenttest_tolerate_flaky"):
+            # Mixed outcome: defer the verdict to check_flaky so CI can
+            # quarantine flaky tests instead of failing the whole run here.
+            return True
+        label = "flaky" if flaky else "failing"
         raise AssertionError(
             f"Stability: {passed}/{repeat} runs passed (required 100%). "
-            f"First failure: {first_failure}"
+            f"Classified as {label}. First failure: {first_failure}"
         )
     return True
+
+
+def _record_outcome(test_name: str, outcomes: list[bool]) -> None:
+    """Append per-test outcomes to .agenttest-history.jsonl for flaky analysis.
+
+    Each line: {"kind": "test", "at": <epoch>, "name": <test id>,
+                "passed": <count>, "total": <runs>}
+    """
+    path = Path(".agenttest-history.jsonl")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    record = {
+        "kind": "test",
+        "at": time.time(),
+        "name": test_name,
+        "passed": sum(outcomes),
+        "total": len(outcomes),
+    }
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(record) + "\n")

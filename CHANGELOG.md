@@ -2,6 +2,25 @@
 
 All notable changes to AgentTest are documented in this file.
 
+## [0.6.0] - 2026-10-02
+
+### Added
+
+- **Flaky test detection** — a complete quarantine workflow for agent tests whose
+  outcomes vary across runs:
+  - The pytest plugin records every `@agent_test` outcome (pass/fail per run) to
+    `.agenttest-history.jsonl` and gains two CLI options: `--agenttest-repeat N`
+    (override the per-test repeat count) and `--agenttest-tolerate-flaky` (defer
+    the verdict when repeats give mixed results, instead of failing the run).
+  - New `python -m agenttest.check_flaky` command analyzes the history file,
+    aggregates per-test results across runs, and exits non-zero under
+    `--fail-on-flaky` when flaky tests are found. Requires Python 3.9+.
+  - The GitHub Action gains a `fail-on-flaky` input: when `true`, CI re-runs the
+    suite with `--agenttest-repeat 3 --agenttest-tolerate-flaky` and gates the
+    build on `check_flaky` — flaky tests surface in the report instead of
+    flapping the whole pipeline.
+  - `.agenttest-history.jsonl` added to `.gitignore`.
+
 ## [0.5.0] - 2026-10-02
 
 ### Added

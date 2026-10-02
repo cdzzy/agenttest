@@ -64,7 +64,7 @@ from agenttest.metrics import (
 from agenttest.report import build_report, report_to_html, report_to_json, save_report
 from agenttest.snapshots import SnapshotStore, snapshot
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 __all__ = [
     "AgentTestCase",
     "AgentTestSuite",
