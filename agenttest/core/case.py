@@ -207,6 +207,16 @@ class AgentTestCase:
                 f"exceeding max allowed {max_ms}ms"
             )
 
+    def assert_metrics_pass(self, run: AgentRun, metrics, context=None, msg: Optional[str] = None):
+        """Assert the run satisfies the given metric(s) — see agenttest.metrics."""
+        from agenttest.metrics import assert_metrics as _assert
+        _assert(run, metrics, context=context, msg=msg)
+
+    def assert_meets_preset(self, run: AgentRun, preset: str, context=None, msg: Optional[str] = None):
+        """Assert the run meets a named metric preset — see agenttest.metrics.METRIC_PRESETS."""
+        from agenttest.metrics import assert_preset as _assert
+        return _assert(run, preset, context=context, msg=msg)
+
 
 def agent_test(
     name: Optional[str] = None,

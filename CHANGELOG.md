@@ -2,6 +2,19 @@
 
 All notable changes to AgentTest are documented in this file.
 
+## [0.5.0] - 2026-10-02
+
+### Added
+
+- **DeepEval-style metric presets library** (`agenttest/metrics.py`): runs are scored 0.0–1.0 and compared against per-metric thresholds, instead of binary assertions.
+  - `MetricResult` — score, pass/fail against the metric's threshold, a human-readable reason, and an optional details dict.
+  - 8 deterministic metrics: `ErrorFreeMetric`, `LatencyMetric`, `TokenUsageMetric`, `ToolCountMetric`, `ExactMatchMetric`, `ContainsMetric`, `JSONValidityMetric`, `LengthMetric`.
+  - 6 LLM-as-judge metrics with an optional `llm_fn` and deterministic rule-based fallbacks: `AnswerRelevancyMetric`, `FaithfulnessMetric`, `HallucinationMetric`, `SummarizationQualityMetric`, `ToxicityMetric`, `BiasMetric`. Judge invocation or parse failures fail closed (score 0). Toxicity/Bias score the *absence* of harm, so "higher is better" holds for every metric.
+  - 6 named presets (`METRIC_PRESETS`): `smoke`, `performance`, `rag`, `safety`, `quality`, `summarization` — factory callables returning fresh metric instances.
+  - Batch API: `evaluate_metrics()`, `assert_metrics()`, `assert_preset()`; plus `MetricAssertionMixin` and `AgentTestCase.assert_metrics_pass()` / `AgentTestCase.assert_meets_preset()` for test-case style.
+  - Custom metrics: subclass `BaseMetric` and implement `_evaluate(run, context)`; threshold comparison and score clamping are handled by the base class.
+  - 43 new tests in `tests/test_metrics.py` (111 total), plus `examples/test_metrics.py`.
+
 ## [0.4.2] - 2026-09-25
 
 ### Changed

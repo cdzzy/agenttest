@@ -310,6 +310,53 @@ scenarios = ScenarioBuilder.from_csv("test_cases.csv")
 
 ---
 
+### 8. Metric Presets — DeepEval-style scoring
+
+Beyond pass/fail assertions, `agenttest.metrics` scores runs **0.0–1.0** and compares them against a threshold — the DeepEval model:
+
+```python
+from agenttest import (
+    METRIC_PRESETS, evaluate_metrics, assert_metrics, assert_preset,
+    ErrorFreeMetric, LatencyMetric, AnswerRelevancyMetric, FaithfulnessMetric,
+)
+
+# Single metric → MetricResult (score + passed + reason + details)
+result = LatencyMetric(max_ms=5_000).measure(run)
+print(f"{result.metric_name}: score={result.score:.2f} passed={result.passed}")
+print(result.reason)
+
+# Batch: run several metrics, assert all pass
+results = assert_metrics(run, [
+    ErrorFreeMetric(),
+    LatencyMetric(max_ms=5_000),
+    AnswerRelevancyMetric(llm_fn=my_judge),  # LLM-as-judge; rule-based if omitted
+])
+
+# Named presets — one line, opinioniated defaults
+assert_preset(run, "rag")          # AnswerRelevancy + Faithfulness
+assert_preset(run, "smoke")        # ErrorFree + Latency + non-empty output
+assert_preset(run, "performance")  # ErrorFree + Latency + Tokens + ToolCount
+assert_preset(run, "safety")      # Toxicity + Bias
+```
+
+Six presets ship out of the box: `smoke`, `performance`, `rag`, `safety`, `quality`, `summarization`. Presets are factories that return **fresh instances**, so they're safe to share across tests.
+
+LLM-judge metrics (`AnswerRelevancy`, `Faithfulness`, `Hallucination`, `SummarizationQuality`, `Toxicity`, `Bias`) work in two modes:
+
+- **With `llm_fn`** — your judge model receives a JSON instruction and returns `{"score": 0.85, "reason": "..."}` (markdown fences tolerated).
+- **Without `llm_fn`** — deterministic rule-based fallbacks kick in, so presets run **offline in CI for free**. Judge invocation or parse failures fail closed (score 0).
+
+Inside test cases, both styles are available:
+
+```python
+self.assert_metrics_pass(run, [AnswerRelevancyMetric()])
+self.assert_meets_preset(run, "rag", context="retrieved source docs")
+```
+
+Custom metrics: subclass `BaseMetric`, implement `_evaluate(run, context)`, and return `self._result(score, reason, **details)` — threshold comparison and clamping are handled for you.
+
+---
+
 ## Decorator Style (pytest-like)
 
 ```python
@@ -422,6 +469,7 @@ python examples/test_scenarios.py
 - [x] ~~GitHub Actions template~~ ✅ (.github/workflows/ci.yml)
 - [x] ~~YAML test configuration~~ ✅ (load tests from YAML files, inspired by PraisonAI)
 - [x] **JSON Schema assertion** (validate structured agent output against JSON Schema draft-07, examples/test_json_schema.py)
+- [x] **DeepEval-style metric presets** (`MetricResult` scoring, 8 deterministic + 6 LLM-judge metrics with offline fallbacks, 6 named presets — smoke/performance/rag/safety/quality/summarization) ✅ (agenttest/metrics.py, v0.5.0)
 
 ---
 
