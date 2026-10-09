@@ -64,7 +64,22 @@ from agenttest.metrics import (
 from agenttest.report import build_report, report_to_html, report_to_json, save_report
 from agenttest.snapshots import SnapshotStore, snapshot
 
-__version__ = "0.6.0"
+try:
+    from importlib.metadata import version as _pkg_version
+
+    __version__ = _pkg_version("cdzzy-agenttest")
+except Exception:  # not installed (source checkout)
+    # Source-tree fallback: read pyproject.toml so __version__ can never
+    # drift from the declared package version (no runtime dependency).
+    try:
+        import re
+        from pathlib import Path
+
+        _pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+        _m = re.search(r'^version\s*=\s*"([^"]+)"', _pyproject.read_text(encoding="utf-8"), re.M)
+        __version__ = _m.group(1) if _m else "0.0.0"
+    except Exception:
+        __version__ = "0.0.0"
 __all__ = [
     "AgentTestCase",
     "AgentTestSuite",
