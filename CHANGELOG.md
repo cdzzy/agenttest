@@ -2,18 +2,30 @@
 
 All notable changes to AgentTest are documented in this file.
 
-## [Unreleased]
+## [0.6.1] - 2026-10-16
 
-### Changed
+### Fixed
 
-- **Python 3.13 classifier**: the declared supported-Python list in
-  `pyproject.toml` now includes 3.13, matching the already-green CI matrix
-  (tests were passing on 3.13 but the classifier advertised only up to 3.12).
-- **`__version__` drift-proofing** (`agenttest/__init__.py`): the source-tree
-  fallback now reads `version` from `pyproject.toml` instead of a hard-coded
-  literal, so a fresh checkout can never report a version that lags the
-  declared package version. Installed environments keep reading the real
-  distribution metadata.
+- **Structured-output assertions were never exported**. `assert_output_structured`,
+  `assert_output_is_valid_yaml`, `assert_output_field_equals` and
+  `assert_output_contains_fields` existed in `agenttest/assertions/structured.py`
+  but were missing from both the `agenttest.assertions` package exports and the
+  top-level `agenttest` namespace, so users could only reach them through a deep
+  internal import path. They are now exported from both levels, included in
+  `__all__` (wildcard `import *` works again), and the `__all__` list no longer
+  gets overwritten by the optional LLM-judge block.
+- **Version resolution hardened to pyproject-first**: `agenttest.__version__`
+  was read from installed metadata first, which could return a stale version
+  when leftover local `*.egg-info` dirs exist. The adjacent `pyproject.toml`
+  is now the single source of truth in source checkouts/editable installs,
+  falling back to `importlib.metadata` only for regular installs.
+
+### Added tests
+
+- `tests/test_exports.py`: guards that the four structured assertions are
+  exported top-level, appear in `agenttest.__all__`, survive `from
+  agenttest.assertions import *`, and that `__version__` matches
+  `pyproject.toml`.
 
 ## [0.6.0] - 2026-10-02
 
