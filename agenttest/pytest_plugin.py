@@ -115,6 +115,7 @@ def agent(request: Any) -> Callable:
             "Set agenttest_agent = 'yourmodule:agent_fn' in pytest config, "
             "or override the 'agent' fixture in conftest.py."
         )
+    assert raw is not None  # pytest.fail raises before this point
     return _wrap_agent_as_sync_invoke(raw)
 
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Structured output assertions — validate agent outputs against schemas or models.
 
 These assertions answer: "Does the agent's output conform to the expected structure?"
@@ -111,7 +111,9 @@ def _validate_pydantic(run: AgentRun, parsed: Any, model: Type[T]) -> T:
             raise TypeError(f"Expected a Pydantic BaseModel, got {model}")
         
         try:
-            return model.model_validate(parsed)
+            # model_validate exists on all BaseModel subclasses; the
+            # issubclass guard above has already narrowed the runtime type.
+            return model.model_validate(parsed)  # type: ignore[attr-defined]
         except ValidationError as e:
             raise AssertionError(
                 f"Output does not conform to Pydantic model {model.__name__}.\n"
