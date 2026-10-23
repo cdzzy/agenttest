@@ -1,4 +1,4 @@
-﻿"""
+"""
 Test runner - executes tests and collects results.
 """
 from __future__ import annotations
@@ -15,9 +15,9 @@ from agenttest.core.suite import AgentTestSuite
 def _normalize_result(run: AgentRun, result) -> None:
     """Normalize an agent's raw return value into the AgentRun fields."""
     if isinstance(result, dict):
-        run.output = result.get("output", result.get("response", str(result)))
-        run.tool_calls = result.get("tool_calls", result.get("intermediate_steps", []))
-        run.reasoning_steps = result.get("reasoning_steps", result.get("thoughts", []))
+        run.output = str(result.get("output") or result.get("response") or result)
+        run.tool_calls = result.get("tool_calls") or result.get("intermediate_steps") or []
+        run.reasoning_steps = result.get("reasoning_steps") or result.get("thoughts") or []
         run.tokens_used = result.get("usage", {}).get("total_tokens", 0)
         run.metadata = {k: v for k, v in result.items()
                         if k not in ("output", "tool_calls", "reasoning_steps")}
@@ -48,7 +48,7 @@ def _wrap_agent_as_invoke(raw_agent: Callable) -> Callable:
             return run
         return wrapped_invoke
 
-    def wrapped_invoke(input_text: str, **kwargs) -> AgentRun:
+    def wrapped_invoke_sync(input_text: str, **kwargs) -> AgentRun:
         start = _time.perf_counter()
         run = AgentRun(input=input_text, output="")
         try:
@@ -58,7 +58,7 @@ def _wrap_agent_as_invoke(raw_agent: Callable) -> Callable:
         run.duration_ms = (_time.perf_counter() - start) * 1000
         return run
 
-    return wrapped_invoke
+    return wrapped_invoke_sync
 
 
 def _wrap_agent_as_sync_invoke(raw_agent: Callable) -> Callable:

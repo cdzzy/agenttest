@@ -39,7 +39,7 @@ import inspect
 import json
 import time
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, cast
 
 import pytest
 
@@ -96,7 +96,7 @@ def _resolve_raw_agent(config: Any) -> Optional[Callable]:
     obj = importlib.import_module(module_name.strip())
     if attr:
         return getattr(obj, attr.strip())
-    return obj
+    return cast(Callable[..., Any], obj)
 
 
 @pytest.fixture

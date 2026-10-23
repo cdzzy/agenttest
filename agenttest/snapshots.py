@@ -139,7 +139,7 @@ def snapshot(store: SnapshotStore, name: str, key: Optional[str] = None):
             return result
 
         wrapper.__name__ = getattr(fn, "__name__", "snapshot_test")
-        wrapper._snapshot_name = snapshot_name
+        setattr(wrapper, "_snapshot_name", snapshot_name)
         return wrapper
 
     return decorator

@@ -131,7 +131,7 @@ class SuiteRunHistory:
         try:
             from statistics import linear_regression
         except ImportError:  # Python 3.9 fallback: plain OLS slope
-            linear_regression = None
+            linear_regression = None  # type: ignore[assignment]
 
         xs = list(range(len(summaries)))
         ys = [s.pass_rate for s in summaries]

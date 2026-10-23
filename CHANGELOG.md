@@ -2,6 +2,31 @@
 
 All notable changes to AgentTest are documented in this file.
 
+## [0.6.2] - 2026-10-23
+
+### Changed
+
+- **Type-safety pass over dynamic decorator metadata**: `@agent_test` /
+  `@test_async` and the snapshot decorator attached metadata by direct
+  attribute assignment, which mypy rejects; the attributes are now set via
+  `setattr` (readers already use `getattr(..., default)`, so the protocol is
+  unchanged).
+- **`_normalize_result` no longer admits `None` into typed fields**
+  (`agenttest.core.case`, `agenttest.core.runner`): dict-shaped agent outputs
+  are now coerced through `str(...)` / `or []` chains, so `AgentRun.output`
+  can never hold `None`.
+- **Renamed the sync wrapper in `_wrap_agent_as_invoke` to
+  `wrapped_invoke_sync`**, removing the duplicate `wrapped_invoke` definition
+  that confused static analysis.
+- **mypy now runs in CI** (`.github/workflows/ci.yml`): the type checker was
+  configured in `pyproject.toml` but never executed. The lint job now installs
+  mypy and checks the `agenttest` package. `[tool.mypy]` moves to
+  `python_version = "3.10"` (the mypy 2.x floor; 3.9 runtime compat is kept via
+  `from __future__ import annotations`).
+- **CI concurrency guard & least privilege** (`.github/workflows/ci.yml`):
+  push/PR runs cancel stale in-progress runs for the same ref and the workflow
+  only requests `contents: read`.
+
 ## [0.6.1] - 2026-10-16
 
 ### Fixed

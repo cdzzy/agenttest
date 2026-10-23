@@ -1,4 +1,4 @@
-﻿"""
+"""
 Test suite for grouping and organizing agent tests.
 """
 from __future__ import annotations
@@ -25,6 +25,7 @@ class AgentTestSuite:
         self.name = name
         self.description = description
         self._cases: List[Dict[str, Any]] = []
+        self._tag_filter: List[str] = []
 
     def add_case(self, test_class: Type[AgentTestCase], agent: Optional[Callable] = None) -> "AgentTestSuite":
         """Add an AgentTestCase subclass to this suite."""

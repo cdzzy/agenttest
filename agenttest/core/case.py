@@ -1,4 +1,4 @@
-﻿"""
+"""
 Core test case definition for AgentTest.
 """
 from __future__ import annotations
@@ -140,9 +140,9 @@ class AgentTestCase:
 
             # Handle different agent return formats
             if isinstance(result, dict):
-                run.output = result.get("output", result.get("response", str(result)))
-                run.tool_calls = result.get("tool_calls", result.get("intermediate_steps", []))
-                run.reasoning_steps = result.get("reasoning_steps", result.get("thoughts", []))
+                run.output = str(result.get("output") or result.get("response") or result)
+                run.tool_calls = result.get("tool_calls") or result.get("intermediate_steps") or []
+                run.reasoning_steps = result.get("reasoning_steps") or result.get("thoughts") or []
                 run.tokens_used = result.get("usage", {}).get("total_tokens", 0)
                 run.metadata = {k: v for k, v in result.items()
                                 if k not in ("output", "tool_calls", "reasoning_steps")}
@@ -240,23 +240,23 @@ def agent_test(
             assert "4" in run.output
     """
     def decorator(fn: Callable) -> Callable:
-        fn._is_agent_test = True
-        fn._test_name = name or fn.__name__
-        fn._test_tags = tags or []
-        fn._skip = skip
-        fn._skip_reason = skip_reason
-        fn._repeat = repeat
+        setattr(fn, "_is_agent_test", True)
+        setattr(fn, "_test_name", name or fn.__name__)
+        setattr(fn, "_test_tags", tags or [])
+        setattr(fn, "_skip", skip)
+        setattr(fn, "_skip_reason", skip_reason)
+        setattr(fn, "_repeat", repeat)
 
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
             return fn(*args, **kwargs)
 
-        wrapper._is_agent_test = True
-        wrapper._test_name = fn._test_name
-        wrapper._test_tags = fn._test_tags
-        wrapper._skip = fn._skip
-        wrapper._skip_reason = fn._skip_reason
-        wrapper._repeat = fn._repeat
+        setattr(wrapper, "_is_agent_test", True)
+        setattr(wrapper, "_test_name", getattr(fn, "_test_name"))
+        setattr(wrapper, "_test_tags", getattr(fn, "_test_tags"))
+        setattr(wrapper, "_skip", getattr(fn, "_skip"))
+        setattr(wrapper, "_skip_reason", getattr(fn, "_skip_reason"))
+        setattr(wrapper, "_repeat", getattr(fn, "_repeat"))
         return wrapper
 
     # Allow use as @agent_test without parentheses
@@ -289,7 +289,7 @@ def test_async(
     def decorator(fn: Callable) -> Callable:
         fn = agent_test(name=name, tags=tags, skip=skip,
                         skip_reason=skip_reason, repeat=repeat)(fn)
-        fn._is_async = True
+        setattr(fn, "_is_async", True)
         return fn
 
     if callable(name):
