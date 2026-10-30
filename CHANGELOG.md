@@ -2,6 +2,23 @@
 
 All notable changes to AgentTest are documented in this file.
 
+## [0.6.3] - 2026-10-30
+
+### Added
+
+- **PyPI release workflow** (`.github/workflows/release.yml`): tag-push
+  publishing is now automated for the first time. The workflow verifies the
+  tag matches the `pyproject.toml` version, runs `ruff check .` and
+  `pytest tests/`, builds sdist + wheel, and publishes via the trusted
+  `pypa/gh-action-pypi-publish` action behind a `PYPI_API_TOKEN` secret
+  guard — the same release pipeline as agentconfig / agentlink.
+
+### Fixed
+
+- **`pyproject.toml` drifted from the CHANGELOG**: the manifest declared
+  0.6.1 while the latest released entry was 0.6.2 (2026-10-23). The version
+  source is now 0.6.3, keeping the two in lockstep going forward.
+
 ## [0.6.2] - 2026-10-23
 
 ### Changed
