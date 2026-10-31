@@ -291,10 +291,10 @@ async def test_assistant():
 
 ## 路线图
 
+- [x] **PR 评论自动报告测试结果**（`agenttest.ci_summary`：JUnit XML → Markdown，Action 内置幂等更新同一条评论）✅ (v0.7.0)
 - [ ] GitHub Actions 官方 Action（`uses: cdzzy/agenttest-action@v1`）
 - [ ] 发布到 GitHub Marketplace
 - [ ] 测试覆盖率徽章自动生成
-- [ ] PR 评论自动报告测试结果
 - [ ] 分布式多智能体链路测试
 - [ ] 视频回放：逐步回溯测试失败原因
 

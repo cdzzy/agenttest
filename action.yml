@@ -1,5 +1,5 @@
 name: 'Agent Test Runner'
-description: 'Run AgentTest suites in CI — zero-config quality gate for AI agents'
+description: 'Run AgentTest suites in CI with a PR comment summary — zero-config quality gate for AI agents'
 author: 'cdzzy'
 branding:
   icon: 'check-circle'
@@ -22,6 +22,37 @@ inputs:
     description: 'Optional pip extras to install (e.g. "openai,langchain")'
     required: false
     default: ''
+  junit-output:
+    description: 'Path for the JUnit XML report'
+    required: false
+    default: 'agenttest-results.xml'
+  summary-output:
+    description: 'Path for the generated Markdown summary'
+    required: false
+    default: 'agenttest-summary.md'
+  comment-on-pr:
+    description: >-
+      Post (or update) a summary comment on the pull request. Set to false to
+      keep results in the workflow log only.
+    required: false
+    default: 'true'
+  github-token:
+    description: >-
+      Token used to post the PR comment. Defaults to the workflow token; pass
+      a PAT only if your branch protection needs one.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  junit-output:
+    description: 'Path to the JUnit XML report'
+    value: ${{ inputs.junit-output }}
+  summary-output:
+    description: 'Path to the Markdown summary'
+    value: ${{ inputs.summary-output }}
+  summary:
+    description: 'The Markdown summary content'
+    value: ${{ steps.summary.outputs.content }}
 
 runs:
   using: 'composite'
@@ -44,7 +75,8 @@ runs:
     - name: Run agent tests
       shell: bash
       run: |
-        pytest "${{ inputs.test-dir }}" -v
+        pytest "${{ inputs.test-dir }}" -v \
+          --junitxml="${{ inputs.junit-output }}"
 
     - name: Detect flaky tests
       if: inputs.fail-on-flaky == 'true'
@@ -53,11 +85,82 @@ runs:
         pytest "${{ inputs.test-dir }}" -q --agenttest-repeat 3 --agenttest-tolerate-flaky
         python -m agenttest.check_flaky --fail-on-flaky
 
+    # Runs even when the test step failed, so reviewers still get the
+    # breakdown in the PR comment rather than just a red X.
+    - name: Build Markdown summary
+      id: summary
+      if: always()
+      shell: bash
+      run: |
+        set +e
+        python -m agenttest.ci_summary "${{ inputs.junit-output }}" \
+          > "${{ inputs.summary-output }}"
+        status=$?
+        set -e
+        if [ ! -s "${{ inputs.summary-output }}" ]; then
+          echo "No summary produced; writing a placeholder." >&2
+          echo "AgentTest produced no results. Check the test step log." > "${{ inputs.summary-output }}"
+        fi
+        {
+          echo 'content<<AGENTTEST_EOF'
+          cat "${{ inputs.summary-output }}"
+          echo 'AGENTTEST_EOF'
+        } >> "$GITHUB_OUTPUT"
+        # Never fail on the summary step; the verdict belongs to the test step.
+        exit 0
+
+    - name: Comment on pull request
+      if: >-
+        always() &&
+        inputs.comment-on-pr == 'true' &&
+        github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          const marker = '<!-- agenttest-ci-report -->';
+          const path = '${{ inputs.summary-output }}';
+          if (!fs.existsSync(path)) {
+            core.info('No summary file found; skipping PR comment.');
+            return;
+          }
+          const body = fs.readFileSync(path, 'utf8');
+          if (!body.trim()) {
+            core.info('Summary is empty; skipping PR comment.');
+            return;
+          }
+
+          const { owner, repo } = context.repo;
+          const issue_number = context.issue.number;
+          const comments = await github.paginate(
+            github.rest.issues.listComments,
+            { owner, repo, issue_number, per_page: 100 },
+          );
+          const existing = comments.find(
+            (c) => typeof c.body === 'string' && c.body.includes(marker),
+          );
+
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner, repo, comment_id: existing.id, body,
+            });
+            core.info(`Updated existing AgentTest comment #${existing.id}.`);
+          } else {
+            const created = await github.rest.issues.createComment({
+              owner, repo, issue_number, body,
+            });
+            core.info(`Created AgentTest comment #${created.data.id}.`);
+          }
+
     - name: Upload results
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: agenttest-results
         path: |
+          ${{ inputs.junit-output }}
+          ${{ inputs.summary-output }}
           .agenttest-history.jsonl
           __snapshots__/
         if-no-files-found: ignore

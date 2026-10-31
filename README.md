@@ -429,6 +429,50 @@ def wrap_autogen(team):
 
 ---
 
+## CI: PR Comment Reports
+
+The bundled GitHub Action turns test results into a comment on the pull
+request, so reviewers see agent quality without opening the Actions tab.
+
+```yaml
+- uses: cdzzy/agenttest@main      # or pin to a release tag
+  with:
+    test-dir: ./tests/agents
+    fail-on-flaky: 'true'         # optional: also gate on flakiness
+    comment-on-pr: 'true'         # default
+```
+
+What the Action does:
+
+1. runs `pytest` with `--junitxml` so results are machine-readable;
+2. converts the XML to Markdown via `agenttest.ci_summary`;
+3. posts (or **updates**) a single PR comment, using the hidden marker
+   `<!-- agenttest-ci-report -->` so repeated pushes don't stack comments;
+4. uploads the XML, the Markdown, the run history and snapshots as artifacts.
+
+The comment contains a summary table plus a collapsed list of failures with
+truncated tracebacks.
+
+You can use the converter on its own — locally or in any CI system:
+
+```bash
+pytest tests/agents --junitxml=agenttest-results.xml
+python -m agenttest.ci_summary agenttest-results.xml > summary.md
+```
+
+```python
+from agenttest.ci_summary import parse_junit, markdown_from_report
+
+report = parse_junit("agenttest-results.xml")
+print(report["tests"], report["passed"], report["failures"])
+```
+
+`parse_junit` understands both `<testsuites>` and `<testsuite>` roots and
+raises `ValueError` on anything that isn't JUnit XML, so a broken report can't
+silently produce an empty summary.
+
+---
+
 ## Examples
 
 ```
@@ -463,6 +507,7 @@ python examples/test_scenarios.py
 - [x] **Reasoning model assertions** ✅ (agenttest/assertions/trace.py, v0.2.0)
 - [x] **Visual test editor** ✅ (agenttest/ui/editor.html, v0.2.0)
 - [x] **GitHub Action** ✅ (action.yml, v0.2.0)
+- [x] **PR comment summary** (`agenttest.ci_summary` — JUnit XML → Markdown, idempotent comment update) ✅ (v0.7.0)
 - [x] **HTML/JSON test reports** ✅ (agenttest/report.py, v0.3.0)
 - [x] **Pytest plugin** (`pytest11` entry point — run `@agent_test` functions under vanilla pytest with the `agent` fixture) ✅ (v0.4.0)
 - [x] ~~LLM-as-judge assertions~~ ✅ (examples/test_llm_judge.py)

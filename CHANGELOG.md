@@ -2,6 +2,54 @@
 
 All notable changes to AgentTest are documented in this file.
 
+## [0.7.0] - 2026-11-01
+
+### Added
+
+- **PR comment reports** (`agenttest/ci_summary.py`): the GitHub Action now
+  posts agent quality results directly on the pull request instead of leaving
+  them buried in the Actions tab.
+  - `parse_junit(path)` — reads a pytest `--junitxml` report into
+    `{tests, failures, errors, passed, skipped, time, cases}`. Handles both
+    `<testsuites>` and `<testsuite>` roots and raises `ValueError` on non-JUnit
+    XML, so a malformed report can't silently yield an empty summary.
+  - `markdown_from_report(report, ...)` / `markdown_from_junit(path, ...)` —
+    render a summary table plus a collapsed failure list with truncated
+    tracebacks (`max_failures` caps the list and counts the remainder).
+  - `python -m agenttest.ci_summary results.xml` — CLI entry point that prints
+    the Markdown and exits non-zero when there are failures, so it can gate a
+    step on its own.
+  - `REPORT_MARKER` (`<!-- agenttest-ci-report -->`) lets the Action find and
+    **update** its previous comment rather than stacking a new one on every
+    push.
+- **Action improvements** (`action.yml`):
+  - Runs pytest with `--junitxml` and exposes `junit-output` / `summary-output`
+    / `summary` outputs.
+  - `comment-on-pr` and `github-token` inputs; the comment step runs on
+    `always()` so a failing test run still reports its breakdown.
+  - The summary step never fails the job — the verdict stays with the test
+    step — and writes a placeholder if no XML was produced.
+  - Results artifact now includes the XML, the Markdown, the run history and
+    snapshots.
+
+### Changed
+
+- **Minimum supported Python is now 3.10** (`requires-python = ">=3.10"`).
+  Python 3.9 reached end-of-life on 2025-10-31 and GitHub's
+  `actions/python-versions` no longer publishes 3.9 builds, so the CI matrix's
+  3.9 `setup-python` step fails to provision an interpreter. The 3.9
+  classifier was dropped, the CI matrix is now 3.10 / 3.11 / 3.12 / 3.13, and
+  black's `target-version` is `py310`/`py311`.
+
+### Testing
+
+- 21 new tests (`tests/test_ci_summary.py`): JUnit parsing (single and multi
+  suite, durations, failure text, missing file, malformed XML, unsupported
+  root), Markdown rendering (marker, summary table, failure details, all-green
+  report, failure cap, truncation, empty report), and the CLI (output, custom
+  title, help, exit codes).
+- Full suite: **135 passed**; `ruff check .` and `mypy agenttest` clean.
+
 ## [0.6.3] - 2026-10-30
 
 ### Added
