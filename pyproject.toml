@@ -65,14 +65,14 @@ include = ["agenttest*"]
 
 [tool.black]
 line-length = 100
-target-version = ["py310", "py311"]
+target-version = ["py310", "py311", "py312", "py313"]
 
 [tool.ruff]
 line-length = 100
 
 [tool.ruff.lint]
 # E4/E7/E9 + F + I mirrors the lint job in CI; typing-modernization rules
-# (UP) are intentionally excluded — the package supports Python 3.9.
+# (UP) are intentionally excluded — the package supports Python 3.10+.
 select = ["E4", "E7", "E9", "F", "I"]
 
 [tool.ruff.lint.per-file-ignores]
